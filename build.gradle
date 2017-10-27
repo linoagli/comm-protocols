@@ -1,0 +1,115 @@
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+/**
+ * Bintray publishing
+ */
+ext {
+    publish_bintrayRepo = 'maven-repo'
+    publish_bintrayName = 'comm-protocols'
+
+    publish_name = 'comm-protocols'
+    publish_description = 'This is a library for implementations of network communication protocols.'
+    publish_siteUrl = 'https://github.com/linoagli/comm-protocols'
+    publish_gitUrl = 'https://github.com/linoagli/comm-protocols.git'
+    publish_year = '2017'
+    publish_developerName = 'Faye-Lino Agli'
+    publish_developerEmail = 'perfectionisms@gmail.com'
+
+    publish_version = '1.0'
+    publish_groupId = 'com.linoagli.java'
+    publish_artifactId = 'comm-protocols'
+    publish_packaging = 'jar'
+
+    publish_license = ['Apache-2.0']
+    publish_licenseName = 'The Apache Software License, Version 2.0'
+    publish_licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+}
+
+group publish_groupId
+version publish_version
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name publish_name
+            description publish_description
+            url publish_siteUrl
+            inceptionYear publish_year
+
+            packaging publish_packaging
+            groupId publish_groupId
+            artifactId publish_artifactId
+            version publish_version
+
+            licenses {
+                license {
+                    name publish_licenseName
+                    url publish_licenseUrl
+                    distribution 'repo'
+                }
+            }
+            scm {
+                connection publish_gitUrl
+                url publish_siteUrl
+
+            }
+            developers {
+                developer {
+                    name publish_developerName
+                    email publish_developerEmail
+                }
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+
+    configurations = ['archives']
+
+    pkg {
+        repo = publish_bintrayRepo
+        name = publish_bintrayName
+        desc = publish_description
+        licenses = publish_license
+        vcsUrl = publish_gitUrl
+        publish = true
+        publicDownloadNumbers = true
+        version {
+            name = publish_version
+        }
+    }
+}
