@@ -4,7 +4,7 @@
  *
  * @author Olubusayo K. Faye-Lino Agli, username: linoagli
  */
-package com.linoagli.java.comprotocols.bluetooth;
+package com.linoagli.comprotocols.bluetooth;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;

@@ -4,7 +4,7 @@
  *
  * @author Olubusayo K. Faye-Lino Agli, username: linoagli
  */
-package com.linoagli.java.comprotocols;
+package com.linoagli.comprotocols;
 
 import java.net.InetAddress;
 

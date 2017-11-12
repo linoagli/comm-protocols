@@ -4,7 +4,7 @@
  *
  * @author Olubusayo K. Faye-Lino Agli, username: linoagli
  */
-package com.linoagli.java.comprotocols.udp;
+package com.linoagli.comprotocols.udp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

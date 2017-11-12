@@ -4,9 +4,9 @@
  *
  * @author Olubusayo K. Faye-Lino Agli, username: linoagli
  */
-package com.linoagli.java.comprotocols.tcp;
+package com.linoagli.comprotocols.tcp;
 
-import com.linoagli.java.comprotocols.DataPacket;
+import com.linoagli.comprotocols.DataPacket;
 
 import java.io.BufferedReader;
 import java.io.IOException;
