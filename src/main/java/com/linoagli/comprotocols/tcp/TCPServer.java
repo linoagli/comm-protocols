@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -65,8 +66,6 @@ public class TCPServer {
 
             incomingConnectionsThread = new IncomingConnectionsThread();
             incomingConnectionsThread.start();
-
-            if (callback != null) callback.onServerStarted(port);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -86,8 +85,6 @@ public class TCPServer {
         }
 
         cleanUp();
-
-        if (callback != null) callback.onServerStopped(port);
     }
 
     private void cleanUp() {
@@ -143,7 +140,8 @@ public class TCPServer {
                     try {
                         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         out = new PrintWriter(socket.getOutputStream(), true);
-                        if (callback != null) callback.onConnected(socket.getInetAddress(), socket.getPort());
+
+                        if (callback != null) callback.onConnected(Connection.this);
 
                         String input;
 
@@ -157,10 +155,11 @@ public class TCPServer {
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        if (callback != null) callback.onConnectionFailed(port);
-                    } finally {
-                        close();
+                        if (e instanceof SocketException) {
+                            System.out.println(e.getMessage());
+                        } else {
+                            e.printStackTrace();
+                        }
                     }
 
                     isListening = false;
@@ -208,6 +207,7 @@ public class TCPServer {
             while (runLoop) {
                 try {
                     if (callback != null) callback.onWaitingForConnection(port);
+
                     Socket socket = serverSocket.accept();
 
                     // If we don't allow multiple connections from the same ip address,
@@ -233,8 +233,11 @@ public class TCPServer {
 
                     connections.add(connection);
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    if (callback != null) callback.onConnectionFailed(port);
+                    if (e instanceof SocketException) {
+                        System.out.println(e.getMessage());
+                    } else {
+                        e.printStackTrace();
+                    }
                 }
 
                 try {
@@ -292,18 +295,28 @@ public class TCPServer {
     }
 
     public interface Callback {
-        public void onServerStarted(int port);
+        /**
+         * Notifies the object implementing this interface that the TCPServer is currently waiting
+         * for an incoming TCP client connection.
+         *
+         * @param port the port number that the server is listening to
+         */
         public void onWaitingForConnection(int port);
-        public void onConnected(InetAddress clientIpAddress, int port);
-        public void onConnectionFailed(int port);
-        public void onServerStopped(int port);
 
         /**
-         * This method is called after onPreDataProcessing. This is where the application
-         * implementing the server instance would act upon the data packet received by the TCP client
+         * Notifies the object implementing this interface that the TCPServer has accepted a
+         * new TCP client and has created a connection instance.
          *
-         * @param connection the Connection instance implementing this callback
-         * @param dataPacket the DataPacket received by the TcpClient attached to the TcpServer
+         * @param connection the newly created TCP connection instance
+         */
+        public void onConnected(Connection connection);
+
+        /**
+         * This method is called when the server receives data from one of the clients connected to it and gives
+         * the object implementing this interface the opportunity to act upon said data.
+         *
+         * @param connection the Connection instance that received the data
+         * @param dataPacket the DataPacket received by the TCPClient
          */
         public void onDataReceived(Connection connection, DataPacket dataPacket);
     }
