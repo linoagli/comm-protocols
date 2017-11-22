@@ -36,14 +36,30 @@ public class TCPServer {
         this.callback = callback;
     }
 
+    /**
+     * @return the port this server is currently listening to.
+     */
     public int getPort() {
         return port;
     }
 
+    /**
+     * Sets a flag that specifies how this server treats multiple incoming connections from the
+     * same IP address:
+     * - If set, the server will create a new connection instance every time, essentially hosting
+     * multiple clients originating from the same IP address.
+     * - If cleared, the server will close the "old" connection and create a new one, essentially
+     * making sure only one connection exists for that IP address.
+     *
+     * @param allow the flag
+     */
     public void setAllowMultipleConnectionsFromSameAddress(boolean allow) {
         this.allowMultipleConnectionsFromSameAddress = allow;
     }
 
+    /**
+     * @return whether or not all the worker threads are currently active  and running.
+     */
     public boolean isRunning() {
         boolean isIncomingConnectionsManagerRunning = incomingConnectionsThread != null && incomingConnectionsThread.isRunning;
         boolean isActiveConnectionsManagerRunning = activeConnectionsThread != null && activeConnectionsThread.isRunning;
@@ -51,10 +67,11 @@ public class TCPServer {
         return isIncomingConnectionsManagerRunning && isActiveConnectionsManagerRunning;
     }
 
-    public ListIterator<Connection> getConnectionListIterator() {
-        return connections.listIterator();
-    }
-
+    /**
+     * Creates a server socket, starts the worker threads and starts listening for incoming TCP client connections.
+     *
+     * @param port the port this server is listening to
+     */
     public void start(int port) {
         this.port = port;
 
@@ -73,6 +90,9 @@ public class TCPServer {
         }
     }
 
+    /**
+     * This will close all active TCP connections and server sockets and finish all the worker threads.
+     */
     public void stop() {
         if (incomingConnectionsThread != null) {
             incomingConnectionsThread.cancel();
@@ -107,7 +127,8 @@ public class TCPServer {
     }
 
     /**
-     * This essentially represents a single active TCP server instance. TODO: i should write a better description for this
+     * This class represents an active connection to a TCP client. This connection will remain active
+     * and listening while the client is connected and actively sending queries.
      */
     public class Connection {
         private Socket socket;
@@ -167,6 +188,11 @@ public class TCPServer {
             }.start();
         }
 
+        /**
+         * Send data as a response to the client that linked to this connection.
+         *
+         * @param response the response data
+         */
         public void respond(String response) {
             try {
                 out.println(response);
@@ -175,7 +201,7 @@ public class TCPServer {
             }
         }
 
-        public void close() {
+        private void close() {
             if (socket != null) {
                 System.out.println("Closing connection to remote device at address: " + getRemoteHostAddress().toString());
 
@@ -250,13 +276,13 @@ public class TCPServer {
             isRunning = false;
         }
 
-        public void cancel() {
+        private void cancel() {
             runLoop = false;
         }
     }
 
     /**
-     * This thread is charge of making sure the connections list only contains active connections
+     * This thread is charge of making sure the connections list only contains active connections.
      */
     private class ActiveConnectionsThread extends Thread {
         private final long SLEEP_TIME = 1000;
@@ -289,7 +315,7 @@ public class TCPServer {
             isRunning = false;
         }
 
-        public void cancel() {
+        private void cancel() {
             runLoop = false;
         }
     }
