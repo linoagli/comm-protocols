@@ -17,6 +17,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides a simplified client side implementation of a TCP/IP connection.
+ */
 public class TCPClient {
     public static final String LINE_PING_QUERY = "comprotocols-query-mRPrLr5t2hURfDULcReMQf7BWsazASUJ";
     public static final int HIGH_QUERY_QUEUE_SIZE_THRESHOLD = 20;
@@ -26,7 +29,7 @@ public class TCPClient {
     private int port;
     private int socketTimeOut = 0;
     private boolean isRunning = false;
-    private boolean isNullResponseBad = false;
+    private boolean isNullResponseBad = true;
 
     private Socket socket;
     private PrintWriter out;
@@ -40,36 +43,66 @@ public class TCPClient {
         this.callback = callback;
     }
 
+    /**
+     * Sets the socket time out delay in milliseconds. When set and response is received from the server
+     * after a query, a socket exception is raised and the client disconnects itself from the server.
+     *
+     * The default value is <b>0</b> which is interpreted as an <i>infinite</i> delay.
+     *
+     * @param socketTimeOut the time out delay in milliseconds
+     */
     public void setSocketTimeOut(int socketTimeOut) {
         this.socketTimeOut = socketTimeOut;
     }
 
     /**
-     * When this client is not connected to a server anymore, it will receive null responses from its queries.
-     * Setting isNullResponseBad to true will force this client to disconnect itself from the "dead" server
+     * Sets a flag that specifies how this client should handle <i>null</i> responses from the server.
+     * Usually, the client receives a <i>null</i> value when its connection to a server is severed unintentionally.
      *
-     * @param isNullResponseBad
+     * Setting this flag will cause this client to automatically disconnect itself from the server.
+     *
+     * This flag is set to <b>true</b> by default
+     *
+     * @param isNullResponseBad the flag
      */
     public void setNullResponseBad(boolean isNullResponseBad) {
         this.isNullResponseBad = isNullResponseBad;
     }
 
+    /**
+     * @return the port number this client is expecting the server to be listening to.
+     */
     public int getPort() {
         return port;
     }
 
+    /**
+     * @return the size of the query queue.
+     */
     public int getQueryQueueSize() {
         return queries.size();
     }
 
+    /**
+     * @return the IP address this client is expecting to find the server at.
+     */
     public InetAddress getServerAddress() {
         return serverAddress;
     }
 
+    /**
+     * @return whether this client is currently connected to a server and set to send and receive data.
+     */
     public boolean isRunning() {
         return isRunning;
     }
 
+    /**
+     * Attempt to connect to a TCP server at the specified address and port
+     *
+     * @param serverIp the IP address of the target server
+     * @param port the port number that the server should be listening to
+     */
     public void connect(InetAddress serverIp, int port) {
         this.serverAddress = serverIp;
         this.port = port;
@@ -80,6 +113,9 @@ public class TCPClient {
         workerThread.start();
     }
 
+    /**
+     * Close this client's connection to the server.
+     */
     public void disconnect() {
         if (workerThread != null) {
             workerThread.cancel();
@@ -89,6 +125,11 @@ public class TCPClient {
         cleanUp();
     }
 
+    /**
+     * Send a request to the server this client is connected to.
+     *
+     * @param query the query string. <i>null</i> and <i>empty</i> strings will be ignored.
+     */
     public void query(String query) {
         if (query == null || query.trim().isEmpty()) {
             System.out.println("Null or empty query string not allowed. Moving on...");
@@ -141,6 +182,9 @@ public class TCPClient {
         }
     }
 
+    /**
+     * This thread does all the heavy lifting: connecting to the server, sending queries, waiting for responses, etc...
+     */
     private class WorkerThread extends Thread {
         private final long SLEEP_TIME = 100;
         private boolean runLoop = true;
@@ -217,6 +261,10 @@ public class TCPClient {
         }
     }
 
+    /**
+     * This thread is sort of a heart beat system. It periodically sends a ping packet to the server
+     * to make sure that the server on the other end is alive and that the current TCP connection is <i>valid</i>
+     */
     private class LinePingThread extends Thread {
         private final long SLEEP_TIME = 3000;
         private boolean runLoop = true;
@@ -240,9 +288,32 @@ public class TCPClient {
     }
 
     public interface Callback {
+        /**
+         * Notifies the object implementing this interface that the client has successfully connected to the server
+         *
+         * @param serverIp the server's IP address
+         * @param port the server's port number
+         */
         public void onConnected(InetAddress serverIp, int port);
+
+        /**
+         * Notifies the object implementing this interface that the connection attemp failed.
+         *
+         * @param serverIp the server's IP address
+         * @param port the server's port number
+         */
         public void onConnectionFailed(InetAddress serverIp, int port);
+
+        /**
+         * Notifies the object implementing this interface that the client has been disconnected from its server.
+         */
         public void onDisconnected();
-        public void onDataReceived(DataPacket data);
+
+        /**
+         * Notifies the object implementing this interface that a data packet was received from the server.
+         *
+         * @param dataPacket the data packet
+         */
+        public void onDataReceived(DataPacket dataPacket);
     }
 }

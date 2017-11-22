@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * Provides a simplified server side implementation of a TCP/IP connection.
+ */
 public class TCPServer {
     public static final String LINE_PING_RESPONSE = "comprotocols-response-mRPrLr5t2hURfDULcReMQf7BWsazASUJ";
 
@@ -58,7 +61,7 @@ public class TCPServer {
     }
 
     /**
-     * @return whether or not all the worker threads are currently active  and running.
+     * @return whether or not this server instance is up and running (listening for incoming connections and data)
      */
     public boolean isRunning() {
         boolean isIncomingConnectionsManagerRunning = incomingConnectionsThread != null && incomingConnectionsThread.isRunning;
