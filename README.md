@@ -1,7 +1,7 @@
 # Comm Protocols
 This library wraps network communication protocols into classes that provide simplified implementations for them.
 Supported protocols currently include:
-- TCP/IP
+- TCP
 - UDP
 - Bluetooth RFComm (server only)
 
@@ -12,7 +12,7 @@ Supported protocols currently include:
 ## How to Use
 Here are brief how-to-use for each of the major protocol implementations and their classes.
 
-### TCP/IP
+### TCP
 For TCP communication, we have a TCPServer class to handler server side events and a TCPClient class that connects to a TCP server and make requests.
 To create a TCPServer and listen for incoming tcp client connections, we do this:
 ```java

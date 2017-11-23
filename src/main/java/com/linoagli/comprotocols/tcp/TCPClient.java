@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Provides a simplified client side implementation of a TCP/IP connection.
+ * Provides a simplified client side implementation of a TCP connection.
  */
 public class TCPClient {
     public static final String LINE_PING_QUERY = "comprotocols-query-mRPrLr5t2hURfDULcReMQf7BWsazASUJ";
@@ -287,6 +287,9 @@ public class TCPClient {
         }
     }
 
+    /**
+     * The TCP client events callback interface
+     */
     public interface Callback {
         /**
          * Notifies the object implementing this interface that the client has successfully connected to the server
