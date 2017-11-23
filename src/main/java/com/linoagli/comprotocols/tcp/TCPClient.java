@@ -24,8 +24,9 @@ public class TCPClient {
     public static final String LINE_PING_QUERY = "comprotocols-query-mRPrLr5t2hURfDULcReMQf7BWsazASUJ";
     public static final int HIGH_QUERY_QUEUE_SIZE_THRESHOLD = 20;
 
-    private InetAddress serverAddress;
     private Callback callback;
+
+    private InetAddress serverAddress;
     private int port;
     private int socketTimeOut = 0;
     private boolean isRunning = false;

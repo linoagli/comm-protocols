@@ -11,14 +11,16 @@ import com.linoagli.comprotocols.DataPacket;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketException;
 
 /**
- * Provides a simplified implementation for receiving and processing UDP packets
+ * A simple way of receiving and processing UDP packets
  */
 public class UDPListener {
-    public final int DEFAULT_DATA_PACKET_SIZE = 512;
+    public final int DEFAULT_DATA_PACKET_SIZE = 1024;
 
     private Callback callback;
+
     private int port;
     private int dataPacketSize = DEFAULT_DATA_PACKET_SIZE;
     private boolean isRunning = false;
@@ -54,7 +56,8 @@ public class UDPListener {
     }
 
     /**
-     * Sets the maximum data packet size in bytes
+     * Sets the maximum data packet size in bytes.
+     * This value defaults to <b>1024</b>
      *
      * @param dataPacketSize the size in bytes
      */
@@ -109,7 +112,11 @@ public class UDPListener {
                         if (callback != null) callback.onDataReceived(data);
                     }
                     catch (IOException e) {
-                        e.printStackTrace();
+                        if (e instanceof SocketException) {
+                            System.out.println(e.getMessage());
+                        } else {
+                            e.printStackTrace();
+                        }
                     }
                 }
 

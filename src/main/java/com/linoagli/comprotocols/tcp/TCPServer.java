@@ -27,6 +27,7 @@ public class TCPServer {
     public static final String LINE_PING_RESPONSE = "comprotocols-response-mRPrLr5t2hURfDULcReMQf7BWsazASUJ";
 
     private Callback callback;
+
     private int port;
     private boolean allowMultipleConnectionsFromSameAddress = false;
 

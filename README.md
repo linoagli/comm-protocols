@@ -3,24 +3,41 @@ This library wraps network communication protocols into classes that provide sim
 Supported protocols currently include:
 - TCP
 - UDP
-- Bluetooth RFComm (server only)
+- Bluetooth RFComm (server implementation only)
 
 ## Current Release
+Work in progress...
 
 ## Add as a Dependency
+For maven:
+```
+<dependency>
+  <groupId>com.linoagli.java</groupId>
+  <artifactId>comm-protocols</artifactId>
+  <version>1.0</version>
+  <type>pom</type>
+</dependency>
+```
+
+For gradle:
+```
+compile 'com.linoagli.java:comm-protocols:1.1'
+```
 
 ## How to Use
 Here are brief how-to-use for each of the major protocol implementations and their classes.
 
 ### TCP
-For TCP communication, we have a TCPServer class to handler server side events and a TCPClient class that connects to a TCP server and make requests.
-To create a TCPServer and listen for incoming tcp client connections, we do this:
+For TCP communication, we have a `TCPServer` class to handler server side events and a `TCPClient` class that connects
+ to a TCP server and make requests.
+Here is an example of how to create a `TCPServer` and listen for incoming tcp client connections:
 ```java
 TCPServer tcpServer = new TCPServer(tcpServerCallback);
 tcpServer.setAllowMultipleConnectionsFromSameAddress(false);
 tcpServer.start(5001);
 ```
-Above, `tcpServerCallback` is simply an instance of the `TCPServer.Callback` interface. That is where you get a change to react to incoming requests from connected clients. Here is an example:
+Above, `tcpServerCallback` is simply an instance of the `TCPServer.Callback` interface. That is where you get a change 
+to react to incoming requests from connected clients. Here is an example:
 ```java
 TCPServer.Callback tcpServerCallback = new TCPServer.Callback() {
     @Override
@@ -35,25 +52,20 @@ TCPServer.Callback tcpServerCallback = new TCPServer.Callback() {
 
     @Override
     public void onDataReceived(TCPServer.Connection connection, DataPacket dataPacket) {
-        String log = String.format("TCP server: Data packet received from %s:%d. data = %s",
-                                   dataPacket.address.toString(),
-                                   dataPacket.port,
-                                   dataPacket.data);
-        System.out.println(log);
+        System.out.println("TCP server: Data packet received from client: " + dataPacket.data);
         System.out.println("TCP server: responding...");
         connection.respond("Message received and parsed for data(" + dataPacket.data + ")");
     }
 };
 ```
 
-Next, we connect to the server using a TCPClient instance. Here is how it's done:
+Next, let's look at how to connect to the server using a `TCPClient` instance:
 ```java
 tcpClient = new TCPClient(tcpClientCallback);
-tcpClient.setSocketTimeOut(15000);
-tcpClient.setNullResponseBad(false);
 tcpClient.connect(InetAddress.getByName("127.0.0.1"), 5001);
 ```
-Above, `tcpClientCallback` is an instance of `TCPClient.Callback` and provides feedback on connection attempts and response received from the server. Here is an example:
+Above, `tcpClientCallback` is an instance of `TCPClient.Callback` interface which provides feedback on connection 
+attempts and response received from the server. Here is an example:
 ```java
 private static TCPClient.Callback tcpClientCallback = new TCPClient.Callback() {
     @Override
@@ -92,5 +104,39 @@ tcpServer.stop(); // Retiring the server
 ```
 
 ### UDP
+For UDP communication, we have a `UDPListener` class that handles listening incoming packets and a `UDPSender` class
+that is used for sending out UDP packets.
+
+Here is an example of how to start a `UDPListener`:
+```java
+UDPListener udpListener = new UDPListener(5001, udpCallback);
+udpListener.start();
+```
+Above, `udpCallback` is an instance of the `UDPListener.Callback` interface which provides the means to react to
+incoming messages. Here is an example:
+```java
+UDPListener.Callback udpCallback = new UDPListener.Callback() {
+    @Override
+    public void onStarted(int port) {
+        System.out.println("UDP Listener: started listening to port " + port);
+    }
+
+    @Override
+    public void onStopping() {
+        System.out.println("UDP Listener: stopped listening for packets");
+    }
+
+    @Override
+    public void onDataReceived(DataPacket dataPacket) {
+        System.out.println("UDP Listener: data packet received: " + dataPacket.data);
+    }
+};
+```
+
+Now that we know how to listen for UDP messages, we want to know how to them, and it's a simple 1 liner:
+```java
+UDPSender.send("127.0.0.1", 5001, "A Message in a bottle.");
+```
 
 ### Bluetooth RFComm
+Work in progress...
