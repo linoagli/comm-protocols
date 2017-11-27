@@ -8,7 +8,7 @@ Supported protocols currently include:
 - HTTP
 - Bluetooth RFComm (server implementation only)
 
-## Current Version
+## Current Release
 [ ![Download](https://api.bintray.com/packages/linoagli/maven-repo/comm-protocols/images/download.svg) ](https://bintray.com/linoagli/maven-repo/comm-protocols/_latestVersion)
 
 ###### Add as a maven dependency
