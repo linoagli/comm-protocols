@@ -29,7 +29,7 @@ compile 'com.linoagli.java:comm-protocols:1.1'
 ## How to Use
 Here are brief how-to-use for each of the major protocol implementations and their classes.
 
-##### For TCP connections,
+#### For TCP connections,
 we have a `TCPServer` class to handler server side events and a `TCPClient` class that connects
 to a TCP server and make requests.
 Here is an example of how to create a `TCPServer` and listen for incoming tcp client connections:
@@ -110,7 +110,7 @@ tcpClient.disconnect(); // Closing the client connection
 tcpServer.stop(); // Retiring the server
 ```
 
-##### For UDP communications,
+#### For UDP communications,
 we have a `UDPListener` class that handles listening incoming packets and a `UDPSender` class
 that is used for sending out UDP packets.
 
@@ -145,7 +145,7 @@ Now that we know how to listen for UDP messages, we want to know how to them, an
 UDPSender.send("127.0.0.1", 5001, "A Message in a bottle.");
 ```
 
-##### For HTTP connections,
+#### For HTTP connections,
 we have the `HttpRequest` class which provides pretty straightforward way of make HTTP requests (a)synchronously.
 <br />
 Here is an example of how to make a simple GET request in one line:
@@ -180,7 +180,7 @@ HttpRequest.Callback requestCallback = new HttpRequest.Callback() {
 request.postAsync(method, url, paramsBuilder.toString(), requestCallback);
 ```
 
-##### For Bluethooth RFComm connections,
+#### For Bluethooth RFComm connections,
 we have a `BluetoothRFCommServer` for service creation.
 The bluetooth implementations are powered by the [bluecove library](http://www.bluecove.org/)
 
