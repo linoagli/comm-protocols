@@ -24,7 +24,7 @@ ext {
     publish_bintrayName = 'comm-protocols'
 
     publish_name = 'comm-protocols'
-    publish_description = 'This is a library for implementations of network communication protocols.'
+    publish_description = 'This library wraps commonly used communication protocols into classes that provide simple implementations for them.'
     publish_siteUrl = 'https://github.com/linoagli/comm-protocols'
     publish_gitUrl = 'https://github.com/linoagli/comm-protocols.git'
     publish_year = '2017'

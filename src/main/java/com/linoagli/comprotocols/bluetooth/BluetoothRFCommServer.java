@@ -15,49 +15,63 @@ import java.io.PrintWriter;
 
 public class BluetoothRFCommServer {
     private Callback callback;
+
     private String serviceUUID;
     private boolean isRunning = false;
     private boolean isBound = false;
-
     private StreamConnectionNotifier notifier;
     private StreamConnection connection;
     private BufferedReader in;
     private PrintWriter out;
-
-    private Worker worker;
+    private WorkerThread workerThread;
 
     public BluetoothRFCommServer(Callback callback) {
         this.callback = callback;
     }
 
+    /**
+     * @return whether or not this server instance is up and running.
+     */
     public boolean isRunning() {
         return isRunning;
     }
 
+    /**
+     * @return whether or not this server instance is connected to bluetooth client.
+     */
     public boolean isBound() {
         return isBound;
     }
 
+    /**
+     * Boots up this server instance and starts listening for incoming connections.
+     *
+     * @param serviceUUID the UUID this server will use as its service UUID
+     */
     public void start(String serviceUUID) {
         this.serviceUUID = serviceUUID;
 
-        worker = new Worker();
-        worker.start();
-
-        if (callback != null) callback.onStarted(serviceUUID);
+        workerThread = new WorkerThread();
+        workerThread.start();
     }
 
+    /**
+     * Powers down the server instance and cleans up all resources.
+     */
     public void stop() {
-        if (worker != null) {
-            worker.cancel();
-            worker = null;
+        if (workerThread != null) {
+            workerThread.cancel();
+            workerThread = null;
         }
 
         closeAllStreamsAndConnections();
-
-        if (callback != null) callback.onStopped(serviceUUID);
     }
 
+    /**
+     * Send data as a response to the client that linked to this connection.
+     *
+     * @param response the response data
+     */
     public void respond(String response) {
         try {
             out.println(response);
@@ -104,7 +118,10 @@ public class BluetoothRFCommServer {
         }
     }
 
-    private class Worker extends Thread {
+    /**
+     * This thread does all the heavy lifting.
+     */
+    private class WorkerThread extends Thread {
         private boolean runLoop = true;
 
         @Override
@@ -117,10 +134,12 @@ public class BluetoothRFCommServer {
                     notifier = (StreamConnectionNotifier) Connector.open(uri);
 
                     if (callback != null) callback.onWaitingForConnection(serviceUUID);
+
                     connection = notifier.acceptAndOpen();
 
-                    if (callback != null) callback.onConnected();
                     isBound = true;
+
+                    if (callback != null) callback.onConnected();
 
                     try {
                         in = new BufferedReader(new InputStreamReader(connection.openInputStream()));
@@ -136,7 +155,6 @@ public class BluetoothRFCommServer {
                     }
 
                     isBound = false;
-                    if (callback != null) callback.onDisconnected();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -154,17 +172,34 @@ public class BluetoothRFCommServer {
             isRunning = false;
         }
 
-        public void cancel() {
+        private void cancel() {
             runLoop = false;
         }
     }
 
+    /**
+     * The RFComm server events callback interface.
+     */
     public interface Callback {
-        public void onStarted(String serviceUUID);
+        /**
+         * Notifies the object implementing this interface that the RFComm server is currently waiting for an
+         * incoming TCP client connection.
+         *
+         * @param serviceUUID the UUID used to initiate the server
+         */
         public void onWaitingForConnection(String serviceUUID);
+
+        /**
+         * Notifies the object implementing this interface that the RFComm server has accepted a Bluetooth connection.
+         */
         public void onConnected();
-        public void onDataReceived(BluetoothRFCommServer bluetoothServer, String data);
-        public void onDisconnected();
-        public void onStopped(String serviceUUID);
+
+        /**
+         * Notifies the object implementing this interface that the server received data from the connected BT client.
+         *
+         * @param rfCommServer the server instance that received the data
+         * @param data the received data string
+         */
+        public void onDataReceived(BluetoothRFCommServer rfCommServer, String data);
     }
 }

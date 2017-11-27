@@ -25,9 +25,9 @@ public class UDPListener {
     private int dataPacketSize = DEFAULT_DATA_PACKET_SIZE;
     private boolean isRunning = false;
 
-    private WorkerThread thread;
     private DatagramSocket serverSocket;
     private DataPacket data;
+    private WorkerThread thread;
 
     public UDPListener(int port, Callback callback) {
         this.port = port;
@@ -42,7 +42,7 @@ public class UDPListener {
     }
 
     /**
-     * @return whether this listener is active and listening for incoming data packets
+     * @return whether or not this listener is active and listening for incoming data packets
      */
     public boolean isRunning() {
         return isRunning;

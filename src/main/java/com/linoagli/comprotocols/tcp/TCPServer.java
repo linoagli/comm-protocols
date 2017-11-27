@@ -72,7 +72,7 @@ public class TCPServer {
     }
 
     /**
-     * Creates a server socket, starts the worker threads and starts listening for incoming TCP client connections.
+     * Boots up this server instance and starts listening for incoming TCP client connections.
      *
      * @param port the port this server is listening to
      */
@@ -95,7 +95,7 @@ public class TCPServer {
     }
 
     /**
-     * This will close all active TCP connections and server sockets and finish all the worker threads.
+     * This will close all active TCP connections, power down the server instance and clean up all resources.
      */
     public void stop() {
         if (incomingConnectionsThread != null) {
@@ -325,31 +325,31 @@ public class TCPServer {
     }
 
     /**
-     * The TCP server events callback interface
+     * The TCP server events callback interface.
      */
     public interface Callback {
         /**
-         * Notifies the object implementing this interface that the TCPServer is currently waiting
-         * for an incoming TCP client connection.
+         * Notifies the object implementing this interface that the TCPServer is currently waiting for an incoming
+         * TCP client connection.
          *
          * @param port the port number that the server is listening to
          */
         public void onWaitingForConnection(int port);
 
         /**
-         * Notifies the object implementing this interface that the TCPServer has accepted a
-         * new TCP client and has created a connection instance.
+         * Notifies the object implementing this interface that the TCPServer has accepted a new TCP client and has
+         * created a connection instance.
          *
          * @param connection the newly created TCP connection instance
          */
         public void onConnected(Connection connection);
 
         /**
-         * This method is called when the server receives data from one of the clients connected to it and gives
-         * the object implementing this interface the opportunity to act upon said data.
+         * Notifies the object implementing this interface that the server received data from one of the clients
+         * connected to it.
          *
          * @param connection the Connection instance that received the data
-         * @param dataPacket the DataPacket received by the TCPClient
+         * @param dataPacket the received DataPacket
          */
         public void onDataReceived(Connection connection, DataPacket dataPacket);
     }

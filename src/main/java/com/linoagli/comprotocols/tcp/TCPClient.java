@@ -92,7 +92,7 @@ public class TCPClient {
     }
 
     /**
-     * @return whether this client is currently connected to a server and set to send and receive data.
+     * @return whether or not this client is currently connected to a server and set to send and receive data.
      */
     public boolean isRunning() {
         return isRunning;
