@@ -33,26 +33,22 @@ public class HttpRequest {
 
     private Callback callback;
 
-    private Method method;
-    private String url;
-    private String params;
     private String contentType;
     private String charset;
     private String authorization;
     private int timeOutDelay;
+    private Method method;
+    private String url;
+    private String params;
+    private boolean wasSuccessful;
     private int responseCode;
     private String responseString;
 
     public HttpRequest() {
-        method = Method.GET;
-        url = null;
-        params = null;
         contentType = MIME_TYPE_WEB_FORM;
         charset = CHARSET_UTF_8;
         authorization = null;
         timeOutDelay = 15000;
-        responseCode = -1;
-        responseString = null;
     }
 
     /**
@@ -102,14 +98,28 @@ public class HttpRequest {
     }
 
     /**
-     * @return the HTTP request's server response code.
+     * @return the url that was used to submit the HTTP request.
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * @return whether or not the request was successful.
+     */
+    public boolean wasSuccessful() {
+        return wasSuccessful;
+    }
+
+    /**
+     * @return the HTTP request's server response code or -1 if the request failed at the library code level.
      */
     public int getResponseCode() {
         return responseCode;
     }
 
     /**
-     * @return the HTTP response string. This will either be the successful response data or the server's error message.
+     * @return the HTTP request's server response string or an error message if the request failed at the library code level.
      */
     public String getResponseString() {
         return responseString;
@@ -145,6 +155,7 @@ public class HttpRequest {
         this.params = params;
         this.callback = callback;
 
+        this.wasSuccessful = false;
         this.responseCode = -1;
         this.responseString = null;
 
@@ -163,13 +174,13 @@ public class HttpRequest {
 
             // Retrieving string response code
             responseCode = connection.getResponseCode();
-            boolean isResponseCodeASuccessCode = (responseCode / 100) == 2;
+            wasSuccessful = (responseCode / 100) == 2;
 
             // Retrieving the response string
             if (responseCode != HttpURLConnection.HTTP_NO_CONTENT) {
                 try {
 
-                    InputStream is = (isResponseCodeASuccessCode) ? connection.getInputStream() : connection.getErrorStream();
+                    InputStream is = (wasSuccessful) ? connection.getInputStream() : connection.getErrorStream();
                     BufferedInputStream bis = new BufferedInputStream(is);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     int data = 0;
@@ -183,20 +194,18 @@ public class HttpRequest {
                 }
             }
 
-            // Firing the appropriate callback function
-            if (callback != null) {
-                if (isResponseCodeASuccessCode) callback.onRequestSuccess(responseCode, responseString);
-                else callback.onRequestFailure(responseCode, responseString);
-            }
-
             // Cleaning up
             connection.disconnect();
         }
         catch (Exception e) {
             e.printStackTrace();
 
-            if (callback != null) callback.onRequestFailure(-1, e.getMessage());
+            wasSuccessful = false;
+            responseCode = -1;
+            responseString = e.getMessage();
         }
+
+        if (callback != null) callback.onRequestComplete(this);
     }
 
     private HttpURLConnection generateConnection() throws Exception {
@@ -256,7 +265,7 @@ public class HttpRequest {
          * @param key the parameter key
          * @param value the parameter value
          * @param shouldEncodeValue whether or not to encode the parameter value
-         * @return
+         * @return the instance of {@link ParamsBuilder}
          */
         public ParamsBuilder add(String key, String value, boolean shouldEncodeValue) {
             String item = null;
@@ -287,17 +296,9 @@ public class HttpRequest {
         /**
          * Notifies the object implementing this interface that the request was successful.
          *
-         * @param responseCode the server response code
-         * @param responseString the response string
+         * @param request the {@link HttpRequest} instance that fired this callback. The request's results can be
+         *                retrieved here (ie: success, response code, string, etc...)
          */
-        public void onRequestSuccess(int responseCode, String responseString);
-
-        /**
-         * Notifies the object implementing this interface that the request failed.
-         *
-         * @param errorCode the server error code or -1 if the request failed at the library code level
-         * @param errorString the error message
-         */
-        public void onRequestFailure(int errorCode, String errorString);
+        public void onRequestComplete(HttpRequest request);
     }
 }
